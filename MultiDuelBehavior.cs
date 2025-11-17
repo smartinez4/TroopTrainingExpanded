@@ -1,6 +1,5 @@
 ﻿using SandBox.Missions.MissionLogics;
 using SandBox.Missions.MissionLogics.Arena;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
@@ -20,49 +19,42 @@ namespace TroopTrainingExpanded
 
         private readonly List<CharacterObject> _defeatedTroops = new();
         private readonly List<CharacterObject> _troops = troops ?? new List<CharacterObject>();
-        private ArenaPracticeFightMissionController _arena;
 
         private Vec3 _playerSpawnPos;
         private Vec3 _playerForward;
         private readonly List<Vec3> _enemySpawnPositions = new();
         private bool _playerSpawned = false;
+
         private float _deathTimer = -1f;
         private const float DeathDelay = 3f;
+
         private bool _victoryShown = false;
 
         public override void AfterStart()
         {
-            _arena = Mission.GetMissionBehavior<ArenaPracticeFightMissionController>();
-
             ResolveSpawnPositions();
             SpawnAll();
         }
 
-        // =====================================================================
-        //  1) RESOLVE PLAYER + ENEMY SPAWN POSITIONS
-        // =====================================================================
-
         private void ResolveSpawnPositions()
         {
-            // --- Player spawn marker ("sp_arena_player") ---
             var playerEntity = Mission.Scene.FindEntityWithTag("sp_arena_player");
-
-            // --- Specific enemy markers ("sp_arena_opponent") ---
             var opponentEntities = Mission.Scene.FindEntitiesWithTag("sp_arena_opponent").ToList();
-
-            // --- Generic arena markers ---
             var genericEntities = Mission.Scene.FindEntitiesWithTag("sp_arena").ToList();
 
             ResolvePlayerSpawn(playerEntity, genericEntities);
             ResolveEnemySpawns(opponentEntities, genericEntities);
+
+            // Minimal safety fallback
+            if (_enemySpawnPositions.Count == 0)
+                _enemySpawnPositions.Add(_playerSpawnPos + new Vec3(2f, 0f, 0f));
         }
 
         private void ResolvePlayerSpawn(GameEntity playerEntity, List<GameEntity> generic)
         {
             if (playerEntity != null)
             {
-                var f = playerEntity.GetGlobalFrame();
-                NormalizeFrame(ref f);
+                var f = CleanFrame(playerEntity.GetGlobalFrame());
                 _playerSpawnPos = f.origin;
                 _playerForward = f.rotation.f;
                 return;
@@ -70,14 +62,13 @@ namespace TroopTrainingExpanded
 
             if (generic.Count > 0)
             {
-                var f = generic.First().GetGlobalFrame();
-                NormalizeFrame(ref f);
+                var f = CleanFrame(generic.First().GetGlobalFrame());
                 _playerSpawnPos = f.origin;
                 _playerForward = f.rotation.f;
                 return;
             }
 
-            // fallback → player stays where he is
+            // Fallback: use current player position
             if (Mission.MainAgent != null)
             {
                 _playerSpawnPos = Mission.MainAgent.Position;
@@ -90,13 +81,11 @@ namespace TroopTrainingExpanded
             }
         }
 
-        private void ResolveEnemySpawns(List<GameEntity> opponentEntities, List<GameEntity> generic)
+        private void ResolveEnemySpawns(List<GameEntity> opponents, List<GameEntity> generic)
         {
-            if (opponentEntities.Count > 0)
+            if (opponents.Count > 0)
             {
-                _enemySpawnPositions.AddRange(
-                    opponentEntities.Select(e => CleanFrame(e.GetGlobalFrame()))
-                );
+                _enemySpawnPositions.AddRange(opponents.Select(e => CleanFrame(e.GetGlobalFrame()).origin));
                 return;
             }
 
@@ -105,71 +94,25 @@ namespace TroopTrainingExpanded
                 _enemySpawnPositions.AddRange(
                     generic
                         .Where(e => !e.GetGlobalFrame().origin.NearlyEquals(_playerSpawnPos, 0.1f))
-                        .Select(e => CleanFrame(e.GetGlobalFrame()))
+                        .Select(e => CleanFrame(e.GetGlobalFrame()).origin)
                 );
-                return;
             }
-
-            // final fallback: semicircle
-            int count = Math.Min(5, _troops.Count);
-            _enemySpawnPositions.AddRange(
-                ComputeFallbackSemicircle(_playerSpawnPos, _playerForward, count, 7f)
-            );
         }
 
-        private Vec3 CleanFrame(MatrixFrame frame)
+        private MatrixFrame CleanFrame(MatrixFrame f)
         {
-            NormalizeFrame(ref frame);
-            var p = frame.origin;
-            p.z = Mission.Scene.GetGroundHeightAtPosition(p);
-            return p;
+            f.rotation.OrthonormalizeAccordingToForwardAndKeepUpAsZAxis();
+            var o = f.origin;
+            o.z = Mission.Scene.GetGroundHeightAtPosition(o);
+            f.origin = o;
+            return f;
         }
-
-        private void NormalizeFrame(ref MatrixFrame frame)
-        {
-            frame.rotation.OrthonormalizeAccordingToForwardAndKeepUpAsZAxis();
-        }
-
-        // =====================================================================
-        //  2) SEMICIRCLE FALLBACK (only used if no markers exist)
-        // =====================================================================
-
-        private List<Vec3> ComputeFallbackSemicircle(Vec3 center, Vec3 forward, int count, float radius)
-        {
-            var list = new List<Vec3>();
-            if (count <= 0) return list;
-
-            float baseAngle = MathF.Atan2(forward.y, forward.x);
-            float span = MathF.PI;
-            float step = span / (count + 1);
-
-            for (int i = 1; i <= count; i++)
-            {
-                float angle = baseAngle - span / 2f + step * i;
-
-                var p = new Vec3(
-                    center.x + radius * MathF.Cos(angle),
-                    center.y + radius * MathF.Sin(angle),
-                    0f
-                );
-                p.z = Mission.Scene.GetGroundHeightAtPosition(p);
-
-                list.Add(p);
-            }
-
-            return list;
-        }
-
-        // =====================================================================
-        //  3) SPAWN LOGIC (player + all enemies)
-        // =====================================================================
 
         private void SpawnAll()
         {
             if (Mission.MainAgent == null)
                 return;
 
-            // Ensure hostility
             Team attackers = Mission.AttackerTeam;
             attackers.SetIsEnemyOf(Mission.PlayerTeam, true);
             Mission.PlayerTeam.SetIsEnemyOf(attackers, true);
@@ -181,43 +124,44 @@ namespace TroopTrainingExpanded
         private void SpawnPlayer()
         {
             if (Mission.MainAgent != null && Mission.MainAgent.IsActive())
-            {
                 Mission.MainAgent.FadeOut(true, true);
-            }
 
-            var handler = Mission.GetMissionBehavior<MissionAgentHandler>();
-            handler?.SpawnPlayer(false, true); // no civilian gear, no horses
+            var pc = CharacterObject.PlayerCharacter;
 
-            if (Mission.MainAgent != null)
-            {
-                Mission.MainAgent.TeleportToPosition(_playerSpawnPos);
-                Mission.MainAgent.LookDirection = _playerForward;
-            }
+            AgentBuildData data = new AgentBuildData(pc)
+                .Team(Mission.PlayerTeam)
+                .Controller(AgentControllerType.Player)
+                .Equipment(pc.Equipment)
+                .NoHorses(true)
+                .InitialPosition(_playerSpawnPos)
+                .InitialDirection(new Vec2(_playerForward.x, _playerForward.y));
+
+            Agent agent = Mission.SpawnAgent(data);
+            Mission.MainAgent = agent;
+
+            agent.LookDirection = _playerForward;
         }
-
 
         private void SpawnEnemies(Team enemyTeam)
         {
             for (int i = 0; i < _troops.Count; i++)
             {
-                var pos = _enemySpawnPositions[i % _enemySpawnPositions.Count];
-                var lookDir = ComputeLookDirection(pos, _playerSpawnPos);
-
+                Vec3 pos = _enemySpawnPositions[i % _enemySpawnPositions.Count];
+                Vec3 lookDir = ComputeLookDirection(pos, _playerSpawnPos);
                 SpawnEnemy(_troops[i], pos, lookDir, enemyTeam);
             }
         }
 
-        private Vec3 ComputeLookDirection(Vec3 from, Vec3 to)
+        private static Vec3 ComputeLookDirection(Vec3 from, Vec3 to)
         {
-            Vec3 dir = to - from;
-            float len = dir.Length;
-
-            return len > 1e-5f ? dir / len : new Vec3(0f, 1f, 0f);
+            Vec3 d = to - from;
+            float len = d.Length;
+            return len > 1e-5f ? d / len : new Vec3(0f, 1f, 0f);
         }
 
         private void SpawnEnemy(CharacterObject troop, Vec3 pos, Vec3 lookDir, Team enemyTeam)
         {
-            Vec2 look2 = new(lookDir.x, lookDir.y);
+            Vec2 look2 = new Vec2(lookDir.x, lookDir.y);
 
             Agent agent = Mission.SpawnAgent(
                 new AgentBuildData(troop)
@@ -229,7 +173,7 @@ namespace TroopTrainingExpanded
                     .CivilianEquipment(false)
             );
 
-            agent.Controller = Agent.ControllerType.AI;
+            agent.Controller = AgentControllerType.AI;
             agent.SetWatchState(Agent.WatchState.Alarmed);
             agent.SetMorale(100f);
             agent.LookDirection = lookDir;
@@ -238,26 +182,22 @@ namespace TroopTrainingExpanded
         public override void OnAgentRemoved(Agent affected, Agent affector, AgentState state, KillingBlow blow)
         {
             if (affected?.Character is CharacterObject c && affector == Agent.Main)
-            {
                 _defeatedTroops.Add(c);
-            }
         }
 
         public override void OnMissionTick(float dt)
         {
-            // Wait until player is properly spawned
             if (!_playerSpawned)
             {
                 if (Mission.MainAgent != null && Mission.MainAgent.IsActive())
-                {
                     _playerSpawned = true;
-                }
-                return; // do NOT check defeat yet
+
+                return;
             }
 
             var agent = Mission.MainAgent;
 
-            // If player died
+            // Player dead
             if (agent == null || agent.State == AgentState.Killed || agent.Health <= 0f)
             {
                 if (_deathTimer < 0f)
@@ -270,33 +210,27 @@ namespace TroopTrainingExpanded
                     GameMenu.SwitchToMenu("town");
                     Mission.EndMission();
                 }
-                return; // Don't check victory when player is dead
+                return;
             }
 
-            if (!_victoryShown)
+            // Victory
+            if (_victoryShown)
+                return;
+
+            bool anyEnemiesAlive = Mission.Agents.Any(a =>
+                a != null &&
+                a.Team == Mission.AttackerTeam &&
+                a != Mission.MainAgent &&
+                a.IsActive());
+
+            if (!anyEnemiesAlive)
             {
-                bool anyEnemiesAlive = false;
-
-                foreach (var a in Mission.Agents)
-                {
-                    if (a != null &&
-                        a.Team == Mission.AttackerTeam &&
-                        a != Mission.MainAgent &&
-                        a.IsActive())
-                    {
-                        anyEnemiesAlive = true;
-                        break;
-                    }
-                }
-
-                if (!anyEnemiesAlive)
-                {
-                    MBInformationManager.AddQuickInformation(
-                        new TextObject("Victory! Hold Tab to leave"), 3000
-                    );
-                    _victoryShown = true;
-                }
+                MBInformationManager.AddQuickInformation(
+                    new TextObject("Victory! Hold Tab to leave"), 3000
+                );
+                _victoryShown = true;
             }
         }
+
     }
 }
