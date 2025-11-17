@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Helpers;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
-using TaleWorlds.CampaignSystem.Encounters;
 using TaleWorlds.CampaignSystem.GameMenus;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Roster;
@@ -17,25 +18,12 @@ namespace TroopTrainingExpanded
     {
         public static bool DuelInProgress = false;
 
-        private bool _injectOnStart = false;
-
-        // Troops selected for the duel
-        private List<CharacterObject> _selectedTroops = new();
-        private List<CharacterObject> _pendingTroops = new();
-
-        private bool _duelQueued = false;
-
-        private static bool _menusRegistered = false;
-        private bool _eventsRegistered = false;
-
-        // Promotions from duel
+        private readonly List<CharacterObject> _selectedTroops = [];
+        private bool _awaitingMissionStart;
         private MultiDuelBehavior _activeDuel;
 
         public override void RegisterEvents()
         {
-            if (_eventsRegistered) return;
-            _eventsRegistered = true;
-
             CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
             CampaignEvents.OnMissionStartedEvent.AddNonSerializedListener(this, OnMissionStarted);
             CampaignEvents.OnMissionEndedEvent.AddNonSerializedListener(this, OnMissionEnded);
@@ -46,9 +34,6 @@ namespace TroopTrainingExpanded
 
         private void OnSessionLaunched(CampaignGameStarter starter)
         {
-            if (_menusRegistered) return;
-            _menusRegistered = true;
-
             starter.AddGameMenuOption(
                 "town_arena",
                 "ttx_arena_menu",
@@ -62,108 +47,85 @@ namespace TroopTrainingExpanded
 
         private void OpenTroopSelectionScreen()
         {
-            TroopRoster leftRoster = TroopRoster.CreateDummyTroopRoster();
-            TroopRoster leftPrisoners = TroopRoster.CreateDummyTroopRoster();
-            TextObject leftName = new TextObject("Select Troops for Training Duel");
+            const int leftLimit = 5;
 
-            const int leftLimit = 5; // max troops
+            var leftRoster = TroopRoster.CreateDummyTroopRoster();
+            var leftPrisoners = TroopRoster.CreateDummyTroopRoster();
 
-            IsTroopTransferableDelegate transferable =
-                (character, type, side, owner) => true;
+            static bool Transferable(CharacterObject c, PartyScreenLogic.TroopType t,
+                PartyScreenLogic.PartyRosterSide s, PartyBase o) => true;
 
-            // DONE button validation (always enabled, logic handled in onDone)
-            PartyPresentationDoneButtonConditionDelegate doneCondition =
-                (lm, lp, rm, rp, limitL, limitR) =>
-                    new System.Tuple<bool, TextObject>(true, TextObject.Empty);
+            static Tuple<bool, TextObject> AlwaysOk(TroopRoster lm, TroopRoster lp, TroopRoster rm,
+                TroopRoster rp, int lL, int rL) =>
+                new(true, TextObject.GetEmpty());
 
-            PartyPresentationDoneButtonDelegate onDoneClicked =
-                (lm, lp, rm, rp, taken, released, forced, left, right) =>
+            PartyPresentationDoneButtonDelegate onDone = (lm, lp, rm, rp, taken, rel, forced, leftParty, rightParty) =>
+            {
+                var roster = lm.GetTroopRoster().Where(e => e.Number > 0).ToList();
+                int count = roster.Sum(e => e.Number);
+
+                if (count < 1)
                 {
-                    var selected = lm.GetTroopRoster()
-                        .Where(e => e.Number > 0)
-                        .ToList();
+                    InformationManager.DisplayMessage(new InformationMessage("Select at least one troop."));
+                    return false;
+                }
 
-                    int selectedCount = selected.Sum(e => e.Number);
+                if (count > leftLimit)
+                {
+                    InformationManager.DisplayMessage(
+                        new InformationMessage($"You cannot select more than {leftLimit} troops."));
+                    return false;
+                }
 
-                    if (selectedCount < 1)
+                _selectedTroops.Clear();
+                foreach (var e in roster)
+                {
+                    for (int i = 0; i < e.Number; i++)
                     {
-                        InformationManager.DisplayMessage(
-                            new InformationMessage("You must select at least one troop.")
-                        );
-                        return false;
+                        _selectedTroops.Add(e.Character);
+                        MobileParty.MainParty.MemberRoster.AddToCounts(e.Character, 1);
                     }
+                }
 
-                    if (selectedCount > leftLimit)
-                    {
-                        InformationManager.DisplayMessage(
-                            new InformationMessage($"You cannot select more than {leftLimit} troops.")
-                        );
-                        return false;
-                    }
+                _awaitingMissionStart = true;
+                return true;
+            };
 
-                    _pendingTroops.Clear();
-
-                    foreach (var e in selected)
-                    {
-                        for (int i = 0; i < e.Number; i++)
-                        {
-                            _pendingTroops.Add(e.Character);
-
-                            // Restore unit to party (UI temporarily removes it)
-                            MobileParty.MainParty.MemberRoster.AddToCounts(e.Character, 1);
-                        }
-                    }
-
-                    _duelQueued = true;
-                    return true;
-                };
-
-            PartyScreenManager.OpenScreenWithCondition(
-                transferable,
-                doneCondition,
-                onDoneClicked,
+            PartyScreenHelper.OpenScreenWithCondition(
+                Transferable,
+                AlwaysOk,
+                onDone,
                 null,
                 PartyScreenLogic.TransferState.Transferable,
                 PartyScreenLogic.TransferState.NotTransferable,
-                leftName,
+                new TextObject("Select troops to fight"),
                 leftLimit,
                 false,
                 false,
-                PartyScreenMode.Normal,
+                PartyScreenHelper.PartyScreenMode.Normal,
                 leftRoster,
                 leftPrisoners
             );
         }
 
-        // ---------------------------------------------------------------------
-        //  Wait for return to "town" menu
-        // ---------------------------------------------------------------------
         private void OnGameMenuOpened(MenuCallbackArgs args)
         {
-            if (!_duelQueued)
-                return;
-
-            if (args.MenuContext.GameMenu.StringId != "town_arena")
-                return;
-
-            _duelQueued = false;
-
-            _selectedTroops = _pendingTroops.ToList();
-            _pendingTroops.Clear();
-
-            StartDuel();
+            if (_awaitingMissionStart &&
+                args.MenuContext.GameMenu.StringId == "town_arena")
+            {
+                _awaitingMissionStart = false;
+                StartDuel();
+            }
         }
 
-        // ---------------------------------------------------------------------
-        //  Start the duel mission
-        // ---------------------------------------------------------------------
         private void StartDuel()
         {
             DuelInProgress = true;
-            _injectOnStart = true;
 
             var settlement = Settlement.CurrentSettlement;
             var arena = settlement.LocationComplex.GetLocationWithId("arena");
+
+            _awaitingMissionStart = true;
 
             CampaignMission.OpenArenaStartMission(
                 arena.GetSceneName(settlement.Town.GetWallLevel()),
@@ -172,65 +134,47 @@ namespace TroopTrainingExpanded
             );
         }
 
-        // ---------------------------------------------------------------------
-        //  Inject mission logic (MultiDuelBehavior)
-        // ---------------------------------------------------------------------
         private void OnMissionStarted(IMission iMission)
         {
-            if (!_injectOnStart)
+            if (!_awaitingMissionStart)
                 return;
+
+            _awaitingMissionStart = false;
 
             if (iMission is Mission mission)
             {
                 _activeDuel = new MultiDuelBehavior(_selectedTroops);
                 mission.AddMissionBehavior(_activeDuel);
             }
-            else
-            {
-                InformationManager.DisplayMessage(
-                    new InformationMessage("Mission cast failed.")
-                );
-            }
-
-            _injectOnStart = false;
         }
 
-        // ---------------------------------------------------------------------
-        //  After mission ends → Apply promotions
-        // ---------------------------------------------------------------------
         private void OnMissionEnded(IMission mission)
         {
             DuelInProgress = false;
 
-            if (mission is Mission m)
-            {
-                var duel = m.GetMissionBehavior<MultiDuelBehavior>();
-                if (duel != null)
-                {
-                    ApplyPromotionXp(duel.DefeatedTroops);
-                }
-            }
+            if (mission is not Mission m) return;
+
+            var duel = m.GetMissionBehavior<MultiDuelBehavior>();
+            if (duel != null)
+                ApplyPromotionXp(duel.DefeatedTroops);
         }
 
         private void ApplyPromotionXp(IEnumerable<CharacterObject> defeated)
         {
-            if (defeated == null)
-                return;
+            if (defeated == null) return;
 
             var model = Campaign.Current.Models.PartyTroopUpgradeModel;
 
             foreach (var troop in defeated)
             {
-                int added = PromotionHelpers.GrantXpForPromotion(model, troop);
-
-                if (added > 0)
+                bool isAdded = PromotionHelpers.GrantXpForPromotion(model, troop);
+                if (isAdded)
                 {
                     InformationManager.DisplayMessage(
-                        new InformationMessage($"{troop.Name} is now ready for promotion!")
+                        new InformationMessage($"{troop.Name} is ready for promotion!")
                     );
                 }
             }
         }
-
     }
 }

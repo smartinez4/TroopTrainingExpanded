@@ -11,7 +11,6 @@ namespace TroopTrainingExpanded
         {
             base.OnSubModuleLoad();
 
-            // Initialize Harmony and apply all patches in this assembly
             var harmony = new Harmony("trooptrainingexpanded.duel");
             harmony.PatchAll();
         }

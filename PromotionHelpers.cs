@@ -4,36 +4,33 @@ using TaleWorlds.CampaignSystem.Party;
 
 public static class PromotionHelpers
 {
-    public static int GrantXpForPromotion(
+    public static bool GrantXpForPromotion(
         PartyTroopUpgradeModel model,
         CharacterObject troop)
     {
         if (model == null || troop == null)
-            return 0;
+            return false;
 
         var party = PartyBase.MainParty;
         if (party == null)
-            return 0;
+            return false;
 
-        // Determine upgrade target
         CharacterObject upgradeTarget =
             troop.UpgradeTargets != null && troop.UpgradeTargets.Length > 0
                 ? troop.UpgradeTargets[0]
                 : null;
 
         if (upgradeTarget == null)
-            return 0;
+            return false;
 
-        // Required XP for upgrade
         int requiredXp =
             model.GetXpCostForUpgrade(party, troop, upgradeTarget);
 
         if (requiredXp <= 0)
-            return 0;
+            return false;
 
-        // Give the full XP
-        int added = party.MemberRoster.AddXpToTroop(requiredXp, troop);
+        party.MemberRoster.AddXpToTroop(troop, requiredXp);
 
-        return added;
+        return true;
     }
 }
