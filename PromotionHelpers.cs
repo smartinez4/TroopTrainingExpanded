@@ -31,7 +31,7 @@ public static class PromotionHelpers
         if (requiredXp <= 0)
             return 0;
 
-        // Give the full XP, no subtraction
+        // Give the full XP
         int added = party.MemberRoster.AddXpToTroop(requiredXp, troop);
 
         return added;

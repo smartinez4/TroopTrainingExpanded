@@ -1,0 +1,32 @@
+<Module>
+     <Name value="Troop Training Expanded"/>
+     <Id value="TroopTrainingExpanded"/>
+     <Version value="v1.0.0"/>
+     <SingleplayerModule value="true"/>
+     <MultiplayerModule value="false"/>
+     <DependedModules>
+         <DependedModule Id="Native"/>
+         <DependedModule Id="SandBoxCore"/>
+         <DependedModule Id="Sandbox"/>
+         <DependedModule Id="CustomBattle"/>
+         <DependedModule Id="StoryMode" />
+     </DependedModules>
+     <SubModules>
+         <SubModule>
+             <Name value="Troop Training Expanded"/>
+             <DLLName value="TroopTrainingExpanded.dll"/>
+             <SubModuleClassType value="TroopTrainingExpanded.Main"/>
+             <Tags>
+                 <Tag key="DedicatedServerType" value="none" />
+                 <Tag key="IsNoRenderModeElement" value="false" />
+             </Tags>
+             <Xmls>
+                <XmlNode xml_path="" type="Prefab"/> 
+                <XmlNode xml_path="GUI" type="Prefab"/>
+                <XmlNode xml_path="GUI/Prefabs" type="Prefab"/>
+                <XmlNode xml_path="GUI/Prefabs/GameMenu" type="Prefab"/>
+            </Xmls>
+         </SubModule>
+     </SubModules>
+     <Xmls/>
+ </Module>
