@@ -191,11 +191,11 @@
   <ItemGroup>
     <Compile Include="Patches\ArenaPracticeFightPatch.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Behaviors\MultiDuelBehavior.cs" />
+    <Compile Include="Behaviors\ArenaTrainingCombatBehavior.cs" />
     <Compile Include="Helpers\PromotionHelpers.cs" />
     <Compile Include="Helpers\PromotionWoundTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Behaviors\TrainingDuelBehavior.cs" />
+    <Compile Include="Behaviors\TrainingCampaignBehavior.cs" />
     <Compile Include="Patches\PromotionWoundPostfix.cs" />
   </ItemGroup>
   <ItemGroup>
