@@ -11,6 +11,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
+using TroopTrainingExpanded.Helpers;
 
 namespace TroopTrainingExpanded
 {
@@ -47,7 +48,7 @@ namespace TroopTrainingExpanded
 
         private void OpenTroopSelectionScreen()
         {
-            const int leftLimit = 5;
+            int maxTroopSelection = ModConfig.Instance.MaxTrainingTroops;
 
             var leftRoster = TroopRoster.CreateDummyTroopRoster();
             var leftPrisoners = TroopRoster.CreateDummyTroopRoster();
@@ -70,10 +71,10 @@ namespace TroopTrainingExpanded
                     return false;
                 }
 
-                if (count > leftLimit)
+                if (count > maxTroopSelection)
                 {
                     InformationManager.DisplayMessage(
-                        new InformationMessage($"You cannot select more than {leftLimit} troops."));
+                        new InformationMessage($"You cannot select more than {maxTroopSelection} troops."));
                     return false;
                 }
 
@@ -107,7 +108,7 @@ namespace TroopTrainingExpanded
                 PartyScreenLogic.TransferState.Transferable,
                 PartyScreenLogic.TransferState.NotTransferable,
                 new TextObject("Select troops to fight"),
-                leftLimit,
+                maxTroopSelection,
                 false,
                 false,
                 PartyScreenHelper.PartyScreenMode.Normal,

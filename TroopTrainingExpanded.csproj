@@ -40,6 +40,10 @@
     <Reference Include="Bannerlord.Harmony">
       <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\Bannerlord.Harmony.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\OneDrive\Documentos\My Mods\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="SandBox">
       <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\SandBox\bin\Win64_Shipping_Client\SandBox.dll</HintPath>
     </Reference>
@@ -189,6 +193,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\ModConfig.cs" />
     <Compile Include="Patches\ArenaPracticeFightPatch.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Behaviors\ArenaTrainingCombatBehavior.cs" />
