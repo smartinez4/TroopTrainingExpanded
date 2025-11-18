@@ -1,5 +1,6 @@
 ﻿using SandBox.Missions.MissionLogics;
 using SandBox.Missions.MissionLogics.Arena;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
@@ -13,12 +14,13 @@ using TaleWorlds.MountAndBlade;
 
 namespace TroopTrainingExpanded
 {
-    public class ArenaTrainingCombatBehavior(List<CharacterObject> troops) : MissionLogic
+    public class ArenaTrainingCombatBehavior(List<CharacterObject> troops, List<CharacterObject> companions) : MissionLogic
     {
         public IReadOnlyList<CharacterObject> DefeatedTroops => _defeatedTroops;
 
         private readonly List<CharacterObject> _defeatedTroops = new();
         private readonly List<CharacterObject> _troops = troops ?? new List<CharacterObject>();
+        private readonly List<CharacterObject> _companions = companions ?? new List<CharacterObject>();
 
         private Vec3 _playerSpawnPos;
         private Vec3 _playerForward;
@@ -32,6 +34,7 @@ namespace TroopTrainingExpanded
 
         public override void AfterStart()
         {
+            _defeatedTroops.Clear();
             ResolveSpawnPositions();
             SpawnAll();
         }
@@ -85,17 +88,34 @@ namespace TroopTrainingExpanded
         {
             if (opponents.Count > 0)
             {
-                _enemySpawnPositions.AddRange(opponents.Select(e => CleanFrame(e.GetGlobalFrame()).origin));
+                _enemySpawnPositions.AddRange(
+                    opponents.Select(e => CleanFrame(e.GetGlobalFrame()).origin)
+                );
                 return;
             }
 
             if (generic.Count > 0)
             {
-                _enemySpawnPositions.AddRange(
-                    generic
-                        .Where(e => !e.GetGlobalFrame().origin.NearlyEquals(_playerSpawnPos, 0.1f))
-                        .Select(e => CleanFrame(e.GetGlobalFrame()).origin)
-                );
+                var positions = generic
+                    .Select(e => CleanFrame(e.GetGlobalFrame()).origin)
+                    .Where(p => !p.NearlyEquals(_playerSpawnPos, 0.1f))
+                    .ToList();
+
+                if (positions.Count > 0)
+                {
+                    _enemySpawnPositions.AddRange(positions);
+                    return;
+                }
+            }
+
+            int needed = Math.Max(1, _troops.Count);
+            const float radius = 2f;
+
+            for (int i = 0; i < needed; i++)
+            {
+                float angle = (float)(i * (2 * Math.PI / needed));
+                var offset = new Vec3(MathF.Cos(angle) * radius, MathF.Sin(angle) * radius, 0f);
+                _enemySpawnPositions.Add(_playerSpawnPos + offset);
             }
         }
 
@@ -118,6 +138,7 @@ namespace TroopTrainingExpanded
             Mission.PlayerTeam.SetIsEnemyOf(attackers, true);
 
             SpawnPlayer();
+            SpawnCompanions();
             SpawnEnemies(attackers);
         }
 
@@ -142,6 +163,30 @@ namespace TroopTrainingExpanded
             Mission.MainAgent = agent;
 
             agent.LookDirection = _playerForward;
+        }
+
+        private void SpawnCompanions()
+        {
+            foreach (var comp in _companions)
+            {
+                Vec3 offset = _playerSpawnPos + new Vec3(MBRandom.RandomFloatRanged(-1f, 1f), MBRandom.RandomFloatRanged(-1f, 1f), 0);
+                Vec3 lookDir = _playerForward;
+
+                Agent agent = Mission.SpawnAgent(
+                    new AgentBuildData(comp)
+                        .Team(Mission.PlayerTeam)
+                        .InitialPosition(offset)
+                        .InitialDirection(new Vec2(lookDir.x, lookDir.y))
+                        .TroopOrigin(new PartyAgentOrigin(comp.HeroObject.PartyBelongedTo.Party, comp))
+                        .NoHorses(!EquipHeroHorse())
+                        .CivilianEquipment(false)
+                );
+
+                agent.Controller = AgentControllerType.AI;
+                agent.SetWatchState(Agent.WatchState.Alarmed);
+                agent.SetMorale(100f);
+                agent.LookDirection = lookDir;
+            }
         }
 
         private void SpawnEnemies(Team enemyTeam)
@@ -204,8 +249,13 @@ namespace TroopTrainingExpanded
 
         public override void OnAgentRemoved(Agent affected, Agent affector, AgentState state, KillingBlow blow)
         {
-            if (affected?.Character is CharacterObject c && affector == Agent.Main)
+            if (affected?.Character is not CharacterObject c)
+                return;
+
+            if (affector != null && affector.Team == Mission.PlayerTeam)
+            {
                 _defeatedTroops.Add(c);
+            }
         }
 
         public override void OnMissionTick(float dt)
