@@ -19,7 +19,7 @@ namespace TroopTrainingExpanded
         {
             if (gameStarterObject is CampaignGameStarter starter)
             {
-                starter.AddBehavior(new TrainingDuelBehavior());
+                starter.AddBehavior(new TrainingCampaignBehavior());
             }
         }
     }

@@ -13,7 +13,7 @@ using TaleWorlds.MountAndBlade;
 
 namespace TroopTrainingExpanded
 {
-    public class MultiDuelBehavior(List<CharacterObject> troops) : MissionLogic
+    public class ArenaTrainingCombatBehavior(List<CharacterObject> troops) : MissionLogic
     {
         public IReadOnlyList<CharacterObject> DefeatedTroops => _defeatedTroops;
 
@@ -126,13 +126,15 @@ namespace TroopTrainingExpanded
             if (Mission.MainAgent != null && Mission.MainAgent.IsActive())
                 Mission.MainAgent.FadeOut(true, true);
 
-            var pc = CharacterObject.PlayerCharacter;
+            Hero hero = Hero.MainHero;
+            CharacterObject character = hero.CharacterObject;
 
-            AgentBuildData data = new AgentBuildData(pc)
+            AgentBuildData data = new AgentBuildData(character)
                 .Team(Mission.PlayerTeam)
                 .Controller(AgentControllerType.Player)
-                .Equipment(pc.Equipment)
+                .Equipment(hero.BattleEquipment)
                 .NoHorses(true)
+                .TroopOrigin(new PartyAgentOrigin(Hero.MainHero.PartyBelongedTo.Party, character))
                 .InitialPosition(_playerSpawnPos)
                 .InitialDirection(new Vec2(_playerForward.x, _playerForward.y));
 

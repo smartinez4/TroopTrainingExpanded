@@ -14,13 +14,13 @@ using TaleWorlds.MountAndBlade;
 
 namespace TroopTrainingExpanded
 {
-    public class TrainingDuelBehavior : CampaignBehaviorBase
+    public class TrainingCampaignBehavior : CampaignBehaviorBase
     {
         public static bool DuelInProgress = false;
 
         private readonly List<CharacterObject> _selectedTroops = [];
         private bool _awaitingMissionStart;
-        private MultiDuelBehavior _activeDuel;
+        private ArenaTrainingCombatBehavior _activeDuel;
 
         public override void RegisterEvents()
         {
@@ -74,6 +74,14 @@ namespace TroopTrainingExpanded
                 {
                     InformationManager.DisplayMessage(
                         new InformationMessage($"You cannot select more than {leftLimit} troops."));
+                    return false;
+                }
+
+                bool hasWounded = roster.Any(e => e.WoundedNumber > 0);
+                if (hasWounded)
+                {
+                    InformationManager.DisplayMessage(
+                        new InformationMessage("You cannot send wounded troops into training fights."));
                     return false;
                 }
 
@@ -143,7 +151,7 @@ namespace TroopTrainingExpanded
 
             if (iMission is Mission mission)
             {
-                _activeDuel = new MultiDuelBehavior(_selectedTroops);
+                _activeDuel = new ArenaTrainingCombatBehavior(_selectedTroops);
                 mission.AddMissionBehavior(_activeDuel);
             }
         }
@@ -154,7 +162,7 @@ namespace TroopTrainingExpanded
 
             if (mission is not Mission m) return;
 
-            var duel = m.GetMissionBehavior<MultiDuelBehavior>();
+            var duel = m.GetMissionBehavior<ArenaTrainingCombatBehavior>();
             if (duel != null)
                 ApplyPromotionXp(duel.DefeatedTroops);
         }
