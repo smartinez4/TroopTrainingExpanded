@@ -11,21 +11,21 @@ namespace TroopTrainingExpanded
         [HarmonyPatch("StartPractice")]
         static bool StopPracticeFight()
         {
-            return !TrainingDuelBehavior.DuelInProgress;
+            return !TrainingCampaignBehavior.DuelInProgress;
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("OnMissionTick")]
         static bool StopSpawning()
         {
-            return !TrainingDuelBehavior.DuelInProgress;
+            return !TrainingCampaignBehavior.DuelInProgress;
         }
 
         [HarmonyPostfix]
         [HarmonyPatch("AfterStart")]
         static void FixPlayerSpawn(ArenaPracticeFightMissionController __instance)
         {
-            if (!TrainingDuelBehavior.DuelInProgress)
+            if (!TrainingCampaignBehavior.DuelInProgress)
                 return;
 
             var mission = Mission.Current;

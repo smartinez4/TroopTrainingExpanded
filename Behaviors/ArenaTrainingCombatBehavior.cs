@@ -13,7 +13,7 @@ using TaleWorlds.MountAndBlade;
 
 namespace TroopTrainingExpanded
 {
-    public class MultiDuelBehavior(List<CharacterObject> troops) : MissionLogic
+    public class ArenaTrainingCombatBehavior(List<CharacterObject> troops) : MissionLogic
     {
         public IReadOnlyList<CharacterObject> DefeatedTroops => _defeatedTroops;
 
