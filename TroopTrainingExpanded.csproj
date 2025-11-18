@@ -204,5 +204,8 @@
   <ItemGroup>
     <Content Include="SubModule.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="CHANGELOG.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
