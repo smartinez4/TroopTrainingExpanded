@@ -133,7 +133,7 @@ namespace TroopTrainingExpanded
                 .Team(Mission.PlayerTeam)
                 .Controller(AgentControllerType.Player)
                 .Equipment(hero.BattleEquipment)
-                .NoHorses(true)
+                .NoHorses(!EquipHeroHorse())
                 .TroopOrigin(new PartyAgentOrigin(Hero.MainHero.PartyBelongedTo.Party, character))
                 .InitialPosition(_playerSpawnPos)
                 .InitialDirection(new Vec2(_playerForward.x, _playerForward.y));
@@ -170,7 +170,7 @@ namespace TroopTrainingExpanded
                     .Team(enemyTeam)
                     .InitialPosition(pos)
                     .InitialDirection(look2)
-                    .NoHorses(true)
+                    .NoHorses(!HasHorse(troop))
                     .TroopOrigin(new SimpleAgentOrigin(troop))
                     .CivilianEquipment(false)
             );
@@ -179,6 +179,27 @@ namespace TroopTrainingExpanded
             agent.SetWatchState(Agent.WatchState.Alarmed);
             agent.SetMorale(100f);
             agent.LookDirection = lookDir;
+        }
+        private bool EquipHeroHorse()
+        {
+            bool heroHasHorse = HasHorse(Hero.MainHero.CharacterObject);
+
+            if (!heroHasHorse)
+                return false;
+
+            foreach (var troop in _troops)
+            {
+                if (HasHorse(troop))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool HasHorse(CharacterObject character)
+        {
+            var horse = character?.Equipment?.GetEquipmentFromSlot(EquipmentIndex.Horse).Item;
+            return horse != null;
         }
 
         public override void OnAgentRemoved(Agent affected, Agent affector, AgentState state, KillingBlow blow)
@@ -233,6 +254,5 @@ namespace TroopTrainingExpanded
                 _victoryShown = true;
             }
         }
-
     }
 }
