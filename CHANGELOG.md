@@ -1,5 +1,9 @@
 ﻿## Changelog
 
+## 1.1.0
+- Added team battles: companions can now be selected to join a practice fight as allies
+- Companions will also use horses when appropriate, same as the player
+
 ## 1.0.2
 - If cavalry units are selected they will equip their horse and the player will too
 - Added JSON configuration file logic to allow users to customize settings

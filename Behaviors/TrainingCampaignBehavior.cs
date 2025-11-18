@@ -20,6 +20,9 @@ namespace TroopTrainingExpanded
         public static bool DuelInProgress = false;
 
         private readonly List<CharacterObject> _selectedTroops = [];
+        private readonly List<CharacterObject> _companionTroops = [];
+        private readonly List<CharacterObject> _troops = [];
+
         private bool _awaitingMissionStart;
         private ArenaTrainingCombatBehavior _activeDuel;
 
@@ -48,6 +51,10 @@ namespace TroopTrainingExpanded
 
         private void OpenTroopSelectionScreen()
         {
+            _selectedTroops.Clear();
+            _companionTroops.Clear();
+            _troops.Clear();
+
             int maxTroopSelection = ModConfig.Instance.MaxTrainingTroops;
 
             var leftRoster = TroopRoster.CreateDummyTroopRoster();
@@ -87,12 +94,20 @@ namespace TroopTrainingExpanded
                 }
 
                 _selectedTroops.Clear();
-                foreach (var e in roster)
+                foreach (var unit in roster)
                 {
-                    for (int i = 0; i < e.Number; i++)
+                    for (int i = 0; i < unit.Number; i++)
                     {
-                        _selectedTroops.Add(e.Character);
-                        MobileParty.MainParty.MemberRoster.AddToCounts(e.Character, 1);
+                        _selectedTroops.Add(unit.Character);
+                        if (unit.Character.IsHero && unit.Character.HeroObject != Hero.MainHero)
+                        {
+                            _companionTroops.Add(unit.Character);
+                        }
+                        else
+                        {
+                             _troops.Add(unit.Character);
+                        }
+                        MobileParty.MainParty.MemberRoster.AddToCounts(unit.Character, 1);
                     }
                 }
 
@@ -152,7 +167,7 @@ namespace TroopTrainingExpanded
 
             if (iMission is Mission mission)
             {
-                _activeDuel = new ArenaTrainingCombatBehavior(_selectedTroops);
+                _activeDuel = new ArenaTrainingCombatBehavior(_troops, _companionTroops);
                 mission.AddMissionBehavior(_activeDuel);
             }
         }
@@ -160,6 +175,10 @@ namespace TroopTrainingExpanded
         private void OnMissionEnded(IMission mission)
         {
             DuelInProgress = false;
+
+            _selectedTroops.Clear();
+            _companionTroops.Clear();
+            _troops.Clear();
 
             if (mission is not Mission m) return;
 
