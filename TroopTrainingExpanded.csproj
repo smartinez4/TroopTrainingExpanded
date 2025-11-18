@@ -189,14 +189,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArenaPracticeFightPatch.cs" />
+    <Compile Include="Patches\ArenaPracticeFightPatch.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="MultiDuelBehavior.cs" />
-    <Compile Include="PromotionHelpers.cs" />
-    <Compile Include="PromotionWoundTracker.cs" />
+    <Compile Include="Behaviors\MultiDuelBehavior.cs" />
+    <Compile Include="Helpers\PromotionHelpers.cs" />
+    <Compile Include="Helpers\PromotionWoundTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrainingDuelBehavior.cs" />
-    <Compile Include="PromotionWoundPostfix.cs" />
+    <Compile Include="Behaviors\TrainingDuelBehavior.cs" />
+    <Compile Include="Patches\PromotionWoundPostfix.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
