@@ -193,8 +193,10 @@
     <Compile Include="Main.cs" />
     <Compile Include="MultiDuelBehavior.cs" />
     <Compile Include="PromotionHelpers.cs" />
+    <Compile Include="PromotionWoundTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TrainingDuelBehavior.cs" />
+    <Compile Include="PromotionWoundPostfix.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
