@@ -299,7 +299,7 @@ namespace TroopTrainingExpanded
             if (!anyEnemiesAlive)
             {
                 MBInformationManager.AddQuickInformation(
-                    new TextObject("Victory! Hold Tab to leave"), 3000
+                    new TextObject("{=ttx_victory_leave}Victory! Hold Tab to leave"), 3000
                 );
                 _victoryShown = true;
             }
