@@ -40,11 +40,16 @@ namespace TroopTrainingExpanded
         {
             var menuOptionName = new TextObject("{=ttx_training_fight}Training fight").ToString();
 
-            starter.AddGameMenuOption(
-                "town_arena",
-                "ttx_arena_menu",
-                menuOptionName,
-                args => { args.IsEnabled = true; return true; },
+            starter.AddGameMenuOption("town_arena", "ttx_arena_menu", menuOptionName,
+                args => { 
+                    args.optionLeaveType = GameMenuOption.LeaveType.PracticeFight;
+                    if (Hero.MainHero.IsWounded)
+                    {
+                        args.IsEnabled = false;
+                        args.Tooltip = new TextObject("{=ttx_hero_wounded}You cannot participate in training fights while wounded.");
+                    }
+                    return true; 
+                },
                 args => OpenTroopSelectionScreen(),
                 false,
                 3

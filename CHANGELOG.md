@@ -1,5 +1,14 @@
 ﻿## Changelog
 
+## 1.1.2
+If only companions are selected they will spawn as enemies
+Added icon in town menu
+Disable training fight menu if hero is wounded
+
+## 1.1.1
+Added translation template for localization
+Added spanish localization, more will come
+
 ## 1.1.0
 - Added team battles: companions can now be selected to join a practice fight as allies
 - Companions will also use horses when appropriate, same as the player
