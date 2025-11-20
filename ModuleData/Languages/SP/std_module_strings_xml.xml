@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+  <tags>
+      <tag language="Español (LA)" />
+  </tags>
+  <strings>
+    <string id="ttx_training_fight" text="Pelea de entrenamiento" />
+    <string id="ttx_ready_promotion" text="¡{unit} ha recibido un ascenso!" />
+    <string id="ttx_select_troops" text="Selecciona tropas para pelear" />
+    <string id="ttx_select_one" text="Selecciona al menos una unidad." />
+    <string id="ttx_send_wounded" text="No se puede enviar a tropas heridas a peleas de entrenamiento." />
+    <string id="ttx_select_max" text="No puedes seleccionar más de {maxTroopSelection} tropas." />
+    <string id="ttx_victory_leave" text="¡Victoria! Mantén pulsado Tab para salir" />
+  </strings>
+</base>

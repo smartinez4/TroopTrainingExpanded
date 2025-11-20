@@ -207,6 +207,9 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ModuleData\Languages\SP\language_data.xml" />
+    <Content Include="ModuleData\Languages\SP\std_module_strings_xml.xml" />
+    <Content Include="ModuleData\Languages\std_module_strings_xml.xml" />
     <Content Include="SubModule.xml" />
   </ItemGroup>
   <ItemGroup>

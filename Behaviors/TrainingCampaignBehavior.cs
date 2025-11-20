@@ -38,10 +38,12 @@ namespace TroopTrainingExpanded
 
         private void OnSessionLaunched(CampaignGameStarter starter)
         {
+            var menuOptionName = new TextObject("{=ttx_training_fight}Training fight").ToString();
+
             starter.AddGameMenuOption(
                 "town_arena",
                 "ttx_arena_menu",
-                "Training fight",
+                menuOptionName,
                 args => { args.IsEnabled = true; return true; },
                 args => OpenTroopSelectionScreen(),
                 false,
@@ -74,22 +76,26 @@ namespace TroopTrainingExpanded
 
                 if (count < 1)
                 {
-                    InformationManager.DisplayMessage(new InformationMessage("Select at least one troop."));
+                    var msg = new TextObject("{=ttx_select_one}Select at least one unit.").ToString();
+                    InformationManager.DisplayMessage(new InformationMessage(msg));
                     return false;
                 }
 
                 if (count > maxTroopSelection)
                 {
+                    var msg = new TextObject("{=ttx_select_max}You cannot select more than {maxTroopSelection} troops.");
+                    msg.SetTextVariable("maxTroopSelection", maxTroopSelection);
                     InformationManager.DisplayMessage(
-                        new InformationMessage($"You cannot select more than {maxTroopSelection} troops."));
+                        new InformationMessage(msg.ToString()));
                     return false;
                 }
 
                 bool hasWounded = roster.Any(e => e.WoundedNumber > 0);
                 if (hasWounded)
                 {
+                    var msg = new TextObject("{=ttx_send_wounded}You cannot send wounded troops into training fights.").ToString();
                     InformationManager.DisplayMessage(
-                        new InformationMessage("You cannot send wounded troops into training fights."));
+                        new InformationMessage(msg));
                     return false;
                 }
 
@@ -122,7 +128,7 @@ namespace TroopTrainingExpanded
                 null,
                 PartyScreenLogic.TransferState.Transferable,
                 PartyScreenLogic.TransferState.NotTransferable,
-                new TextObject("Select troops to fight"),
+                new TextObject("{=ttx_select_troops}Select troops to fight"),
                 maxTroopSelection,
                 false,
                 false,
@@ -198,8 +204,10 @@ namespace TroopTrainingExpanded
                 bool isAdded = PromotionHelpers.GrantXpForPromotion(model, troop);
                 if (isAdded)
                 {
+                    var msg = new TextObject("{=ttx_ready_promotion}{unit} is ready for promotion!");
+                    msg.SetTextVariable("unit", troop.Name);
                     InformationManager.DisplayMessage(
-                        new InformationMessage($"{troop.Name} is ready for promotion!")
+                        new InformationMessage(msg.ToString())
                     );
                 }
             }
