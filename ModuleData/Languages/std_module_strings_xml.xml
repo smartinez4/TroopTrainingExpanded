@@ -11,5 +11,6 @@
     <string id="ttx_send_wounded" text="You cannot send wounded troops into training fights." />
     <string id="ttx_select_max" text="You cannot select more than {maxTroopSelection} troops." />
     <string id="ttx_victory_leave" text="Victory! Hold Tab to leave" />
+	<string id="ttx_hero_wounded" text="You cannot participate in training fights while wounded." />
   </strings>
 </base>

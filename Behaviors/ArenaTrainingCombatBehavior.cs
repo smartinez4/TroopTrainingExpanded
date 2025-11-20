@@ -171,10 +171,12 @@ namespace TroopTrainingExpanded
             {
                 Vec3 offset = _playerSpawnPos + new Vec3(MBRandom.RandomFloatRanged(-1f, 1f), MBRandom.RandomFloatRanged(-1f, 1f), 0);
                 Vec3 lookDir = _playerForward;
+                bool companionsAreEnemies = _troops.Count == 0;
+                Team companionTeam = companionsAreEnemies ? Mission.AttackerTeam : Mission.PlayerTeam;
 
                 Agent agent = Mission.SpawnAgent(
                     new AgentBuildData(comp)
-                        .Team(Mission.PlayerTeam)
+                        .Team(companionTeam)
                         .InitialPosition(offset)
                         .InitialDirection(new Vec2(lookDir.x, lookDir.y))
                         .TroopOrigin(new PartyAgentOrigin(comp.HeroObject.PartyBelongedTo.Party, comp))
