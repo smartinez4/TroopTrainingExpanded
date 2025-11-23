@@ -41,14 +41,19 @@ namespace TroopTrainingExpanded
             var menuOptionName = new TextObject("{=ttx_training_fight}Training fight").ToString();
 
             starter.AddGameMenuOption("town_arena", "ttx_arena_menu", menuOptionName,
-                args => { 
+                args => {
                     args.optionLeaveType = GameMenuOption.LeaveType.PracticeFight;
                     if (Hero.MainHero.IsWounded)
                     {
                         args.IsEnabled = false;
                         args.Tooltip = new TextObject("{=ttx_hero_wounded}You cannot participate in training fights while wounded.");
                     }
-                    return true; 
+                    if (Campaign.Current.TournamentManager.GetTournamentGame(Settlement.CurrentSettlement.Town) != null)
+                    {
+                        args.IsEnabled = false;
+                        args.Tooltip = new TextObject("{=ttx_tournament_on}You cannot participate in training fights while a tournament is in progress.");
+                    }
+                    return true;
                 },
                 args => OpenTroopSelectionScreen(),
                 false,
