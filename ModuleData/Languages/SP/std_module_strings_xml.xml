@@ -12,5 +12,6 @@
     <string id="ttx_select_max" text="No puedes seleccionar más de {maxTroopSelection} tropas." />
     <string id="ttx_victory_leave" text="¡Victoria! Mantén pulsado Tab para salir" />
 	<string id="ttx_hero_wounded" text="No puedes participar en combates de entrenamiento si estás herido." />
+	<string id="ttx_tournament_on" text="No puedes participar en combates de entrenamiento mientras se esté celebrando un torneo." />
   </strings>
 </base>

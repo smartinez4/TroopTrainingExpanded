@@ -9,7 +9,7 @@ namespace TroopTrainingExpanded.Helpers
         private static string ConfigPath =>
                     Path.Combine(BasePath.Name, "Modules", "TroopTrainingExpanded", "settings.json");
 
-        public int MaxTrainingTroops { get; set; } = 5;
+        public int MaxTrainingTroops { get; set; } = 8;
         public bool EnableHorses { get; set; } = true;
 
         private static ModConfig _instance;
