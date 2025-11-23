@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+    <tags>
+        <tag language="Deutsch" />
+    </tags>
+    <strings>
+		<string id="ttx_training_fight" text="Einheitentraining" />
+	    <string id="ttx_ready_promotion" text="{unit} ist bereit für eine Beförderung!" />
+	    <string id="ttx_select_troops" text="Einheiten für den Kampf auswählen" />
+	    <string id="ttx_select_one" text="Wähle mindestens eine Einheit aus." />
+	    <string id="ttx_send_wounded" text="Du kannst keine verwundeten Einheiten in Trainingskämpfe schicken." />
+	    <string id="ttx_select_max" text="Du kannst nicht mehr als {maxTroopSelection} Einheiten auswählen." />
+	    <string id="ttx_victory_leave" text="Sieg! Zum Verlassen Tab gedrückt halten" />
+	    <string id="ttx_hero_wounded" text="Du kannst nicht an Trainingskämpfe teilnehmen, wenn du verwundet bist." />
+	    <string id="ttx_tournament_on" text="Du kannst nicht an Trainingskämpfe teilnehmen, während ein Turnier stattfindet." /> 
+	</strings>
+</base>

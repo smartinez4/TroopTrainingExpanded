@@ -11,12 +11,15 @@ using TaleWorlds.Engine;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
+using TroopTrainingExpanded.Helpers;
 
 namespace TroopTrainingExpanded
 {
     public class ArenaTrainingCombatBehavior(List<CharacterObject> troops, List<CharacterObject> companions) : MissionLogic
     {
         public IReadOnlyList<CharacterObject> DefeatedTroops => _defeatedTroops;
+        
+        private static readonly bool enableHorses = ModConfig.Instance.EnableHorses;
 
         private readonly List<CharacterObject> _defeatedTroops = new();
         private readonly List<CharacterObject> _troops = troops ?? new List<CharacterObject>();
@@ -231,6 +234,9 @@ namespace TroopTrainingExpanded
         {
             bool heroHasHorse = HasHorse(Hero.MainHero.CharacterObject);
 
+            if (!enableHorses)
+                return false;
+
             if (!heroHasHorse)
                 return false;
 
@@ -245,6 +251,8 @@ namespace TroopTrainingExpanded
 
         private static bool HasHorse(CharacterObject character)
         {
+            if (!enableHorses)
+                return false;
             var horse = character?.Equipment?.GetEquipmentFromSlot(EquipmentIndex.Horse).Item;
             return horse != null;
         }

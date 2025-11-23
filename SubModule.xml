@@ -1,7 +1,7 @@
 <Module>
 	<Name value="Troop Training Expanded"/>
 	<Id value="TroopTrainingExpanded"/>
-	<Version value="v1.1.2"/>
+	<Version value="v1.1.4"/>
 	<SingleplayerModule value="true"/>
 	<MultiplayerModule value="false"/>
 
@@ -11,13 +11,15 @@
 		<GameVersion value="v1.3.0" />
 		<GameVersion value="v1.3.1" />
 		<GameVersion value="v1.3.2" />
+		<GameVersion value="v1.3.3" />
+		<GameVersion value="v1.3.4" />
 	</CompatibleGameVersions>
 
 	<Dependencies>
-		<Module Id="Native" DependentVersion="v1.3.2" />
-		<Module Id="SandBoxCore" DependentVersion="v1.3.2" />
-		<Module Id="SandBox" DependentVersion="v1.3.2" />
-		<Module Id="StoryMode" DependentVersion="v1.3.2" />
+		<Module Id="Native" DependentVersion="v1.3.4" />
+		<Module Id="SandBoxCore" DependentVersion="v1.3.4" />
+		<Module Id="SandBox" DependentVersion="v1.3.4" />
+		<Module Id="StoryMode" DependentVersion="v1.3.4" />
 	</Dependencies>
 
 	<SubModules>

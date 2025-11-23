@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+    <tags>
+        <tag language="Türkçe" />
+    </tags>
+    <strings>
+		<string id="ttx_training_fight" text="Eğitim dövüşü" />
+		<string id="ttx_ready_promotion" text="{unit} terfi aldı!" />
+		<string id="ttx_select_troops" text="Dövüşe göndermek için birlik seç" />
+		<string id="ttx_select_one" text="En az bir birlik seç." />
+		<string id="ttx_send_wounded" text="Yaralı birlikler eğitim dövüşlerine gönderilemez." />
+		<string id="ttx_select_max" text="En fazla {maxTroopSelection} birlik seçebilirsin." />
+		<string id="ttx_victory_leave" text="Zafer! Çıkmak için Tab tuşunu basılı tut" />
+		<string id="ttx_hero_wounded" text="Yaralıyken eğitim dövüşlerine katılamazsın." />
+		<string id="ttx_tournament_on" text="Bir turnuva devam ederken eğitim dövüşlerine katılamazsın." />
+	</strings>
+</base>

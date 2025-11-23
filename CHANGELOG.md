@@ -1,5 +1,14 @@
 ﻿## Changelog
 
+## 1.1.4
+Added a toggle in settings.json to enable or disable horses in training fights
+Added French and Italian localizations 
+
+## 1.1.3
+When a tournament is in progress the option to do training fights will be disabled, same as practice fights
+Added German localization by: EagleFour
+Added Turkish and Polish localization 
+
 ## 1.1.2
 If only companions are selected they will spawn as enemies
 Added icon in town menu

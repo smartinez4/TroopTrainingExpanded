@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+    <tags>
+        <tag language="Polski" />
+    </tags>
+    <strings>
+		<string id="ttx_training_fight" text="Walka treningowa" />
+		<string id="ttx_ready_promotion" text="{unit} otrzymał awans!" />
+		<string id="ttx_select_troops" text="Wybierz oddziały do walki" />
+		<string id="ttx_select_one" text="Wybierz co najmniej jedną jednostkę." />
+		<string id="ttx_send_wounded" text="Nie można wysyłać rannych oddziałów do walk treningowych." />
+		<string id="ttx_select_max" text="Nie możesz wybrać więcej niż {maxTroopSelection} oddziałów." />
+		<string id="ttx_victory_leave" text="Zwycięstwo! Przytrzymaj Tab, aby wyjść" />
+		<string id="ttx_hero_wounded" text="Nie możesz brać udziału w walkach treningowych, gdy jesteś ranny." />
+		<string id="ttx_tournament_on" text="Nie możesz brać udziału w walkach treningowych podczas trwania turnieju." />
+	</strings>
+</base>
