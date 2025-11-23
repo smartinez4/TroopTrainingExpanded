@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+    <tags>
+        <tag language="Italiano" />
+    </tags>
+    <strings>
+		<string id="ttx_training_fight" text="Combattimento di addestramento" />
+		<string id="ttx_ready_promotion" text="{unit} ha ricevuto una promozione!" />
+		<string id="ttx_select_troops" text="Seleziona le truppe per combattere" />
+		<string id="ttx_select_one" text="Seleziona almeno un'unità." />
+		<string id="ttx_send_wounded" text="Non è possibile inviare truppe ferite ai combattimenti di addestramento." />
+		<string id="ttx_select_max" text="Non puoi selezionare più di {maxTroopSelection} truppe." />
+		<string id="ttx_victory_leave" text="Vittoria! Tieni premuto Tab per uscire" />
+		<string id="ttx_hero_wounded" text="Non puoi partecipare ai combattimenti di addestramento se sei ferito." />
+		<string id="ttx_tournament_on" text="Non puoi partecipare ai combattimenti di addestramento mentre è in corso un torneo." />
+	</strings>
+</base>

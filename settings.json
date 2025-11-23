@@ -1,3 +1,4 @@
 {
-  "MaxTrainingTroops": 8
+  "MaxTrainingTroops": 8,
+  "EnableHorses": true
 }

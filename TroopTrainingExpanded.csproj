@@ -207,9 +207,19 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ModuleData\Languages\DE\language_data.xml" />
+    <Content Include="ModuleData\Languages\DE\std_module_strings_xml.xml" />
+    <Content Include="ModuleData\Languages\FR\language_data.xml" />
+    <Content Include="ModuleData\Languages\FR\std_module_strings_xml.xml" />
+    <Content Include="ModuleData\Languages\IT\language_data.xml" />
+    <Content Include="ModuleData\Languages\IT\std_module_strings_xml.xml" />
+    <Content Include="ModuleData\Languages\PL\language_data.xml" />
+    <Content Include="ModuleData\Languages\PL\std_module_strings_xml.xml" />
     <Content Include="ModuleData\Languages\SP\language_data.xml" />
     <Content Include="ModuleData\Languages\SP\std_module_strings_xml.xml" />
     <Content Include="ModuleData\Languages\std_module_strings_xml.xml" />
+    <Content Include="ModuleData\Languages\TR\language_data.xml" />
+    <Content Include="ModuleData\Languages\TR\std_module_strings_xml.xml" />
     <Content Include="SubModule.xml" />
   </ItemGroup>
   <ItemGroup>
