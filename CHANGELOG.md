@@ -1,5 +1,8 @@
 ﻿## Changelog
 
+## 1.1.5
+Removed troop wounding system since it caused more issues than it solved
+
 ## 1.1.4
 Added a toggle in settings.json to enable or disable horses in training fights
 Added French and Italian localizations 

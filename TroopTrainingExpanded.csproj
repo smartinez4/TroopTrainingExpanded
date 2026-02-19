@@ -79,9 +79,6 @@
     <Reference Include="TaleWorlds.Diamond">
       <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Diamond.dll</HintPath>
     </Reference>
-    <Reference Include="TaleWorlds.Diamond.AccessProvider.Epic">
-      <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Diamond.AccessProvider.Epic.dll</HintPath>
-    </Reference>
     <Reference Include="TaleWorlds.Diamond.AccessProvider.GDK">
       <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Diamond.AccessProvider.GDK.dll</HintPath>
     </Reference>
@@ -124,9 +121,6 @@
     <Reference Include="TaleWorlds.GauntletUI.PrefabSystem">
       <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.GauntletUI.PrefabSystem.dll</HintPath>
     </Reference>
-    <Reference Include="TaleWorlds.GauntletUI.TooltipExtensions">
-      <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.GauntletUI.TooltipExtensions.dll</HintPath>
-    </Reference>
     <Reference Include="TaleWorlds.InputSystem">
       <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.InputSystem.dll</HintPath>
     </Reference>
@@ -166,12 +160,6 @@
     <Reference Include="TaleWorlds.MountAndBlade.Launcher.Library">
       <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.MountAndBlade.Launcher.Library.dll</HintPath>
     </Reference>
-    <Reference Include="TaleWorlds.MountAndBlade.Launcher.Multiplayer">
-      <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.MountAndBlade.Launcher.Multiplayer.exe</HintPath>
-    </Reference>
-    <Reference Include="TaleWorlds.MountAndBlade.Launcher.Singleplayer">
-      <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.MountAndBlade.Launcher.Singleplayer.exe</HintPath>
-    </Reference>
     <Reference Include="TaleWorlds.MountAndBlade.Launcher.Steam">
       <HintPath>..\..\..\..\..\Games\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.MountAndBlade.Launcher.Steam.dll</HintPath>
     </Reference>
@@ -198,10 +186,8 @@
     <Compile Include="Main.cs" />
     <Compile Include="Behaviors\ArenaTrainingCombatBehavior.cs" />
     <Compile Include="Helpers\PromotionHelpers.cs" />
-    <Compile Include="Helpers\PromotionWoundTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Behaviors\TrainingCampaignBehavior.cs" />
-    <Compile Include="Patches\PromotionWoundPostfix.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
