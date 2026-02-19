@@ -100,15 +100,6 @@ namespace TroopTrainingExpanded
                     return false;
                 }
 
-                bool hasWounded = roster.Any(e => e.WoundedNumber > 0);
-                if (hasWounded)
-                {
-                    var msg = new TextObject("{=ttx_send_wounded}You cannot send wounded troops into training fights.").ToString();
-                    InformationManager.DisplayMessage(
-                        new InformationMessage(msg));
-                    return false;
-                }
-
                 _selectedTroops.Clear();
                 foreach (var unit in roster)
                 {
