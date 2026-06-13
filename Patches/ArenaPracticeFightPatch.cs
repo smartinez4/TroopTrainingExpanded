@@ -2,7 +2,7 @@
 using SandBox.Missions.MissionLogics.Arena;
 using TaleWorlds.MountAndBlade;
 
-namespace TroopTrainingExpanded
+namespace TroopTrainingExpanded.Patches
 {
     [HarmonyPatch(typeof(ArenaPracticeFightMissionController))]
     public static class ArenaPracticeFightPatch

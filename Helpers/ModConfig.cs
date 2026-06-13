@@ -38,7 +38,7 @@ namespace TroopTrainingExpanded.Helpers
             var cfg = new ModConfig();
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath) ?? "");
                 File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(cfg, Formatting.Indented));
             }
             catch { }
