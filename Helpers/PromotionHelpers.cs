@@ -3,6 +3,8 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.ComponentInterfaces;
 using TaleWorlds.CampaignSystem.Party;
 
+namespace TroopTrainingExpanded.Helpers;
+
 public static class PromotionHelpers
 {
     public static bool GrantXpForPromotion(PartyTroopUpgradeModel model, CharacterObject troop)
@@ -14,7 +16,7 @@ public static class PromotionHelpers
 
         var roster = party.MemberRoster;
 
-        for (int i = 0; i < roster.Count; i++)
+        for (var i = 0; i < roster.Count; i++)
         {
             if (roster.GetCharacterAtIndex(i) != troop)
                 continue;
@@ -23,7 +25,7 @@ public static class PromotionHelpers
             if (upgradeTarget == null) 
                 return false;
 
-            int xp = model.GetXpCostForUpgrade(party, troop, upgradeTarget);
+            var xp = model.GetXpCostForUpgrade(party, troop, upgradeTarget);
             if (xp <= 0)
                 return false;
 

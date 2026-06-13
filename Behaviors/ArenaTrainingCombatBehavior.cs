@@ -1,6 +1,4 @@
-﻿using SandBox.Missions.MissionLogics;
-using SandBox.Missions.MissionLogics.Arena;
-using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
@@ -13,13 +11,13 @@ using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
 using TroopTrainingExpanded.Helpers;
 
-namespace TroopTrainingExpanded
+namespace TroopTrainingExpanded.Behaviors
 {
     public class ArenaTrainingCombatBehavior(List<CharacterObject> troops, List<CharacterObject> companions) : MissionLogic
     {
         public IReadOnlyList<CharacterObject> DefeatedTroops => _defeatedTroops;
         
-        private static readonly bool enableHorses = ModConfig.Instance.EnableHorses;
+        private static readonly bool EnableHorses = ModConfig.Instance.EnableHorses;
 
         private readonly List<CharacterObject> _defeatedTroops = new();
         private readonly List<CharacterObject> _troops = troops ?? new List<CharacterObject>();
@@ -28,12 +26,12 @@ namespace TroopTrainingExpanded
         private Vec3 _playerSpawnPos;
         private Vec3 _playerForward;
         private readonly List<Vec3> _enemySpawnPositions = new();
-        private bool _playerSpawned = false;
+        private bool _playerSpawned;
 
         private float _deathTimer = -1f;
         private const float DeathDelay = 3f;
 
-        private bool _victoryShown = false;
+        private bool _victoryShown;
 
         public override void AfterStart()
         {
@@ -53,7 +51,7 @@ namespace TroopTrainingExpanded
 
             // Minimal safety fallback
             if (_enemySpawnPositions.Count == 0)
-                _enemySpawnPositions.Add(_playerSpawnPos + new Vec3(2f, 0f, 0f));
+                _enemySpawnPositions.Add(_playerSpawnPos + new Vec3(2f));
         }
 
         private void ResolvePlayerSpawn(GameEntity playerEntity, List<GameEntity> generic)
@@ -78,12 +76,12 @@ namespace TroopTrainingExpanded
             if (Mission.MainAgent != null)
             {
                 _playerSpawnPos = Mission.MainAgent.Position;
-                _playerForward = new Vec3(0f, 1f, 0f);
+                _playerForward = new Vec3(0f, 1f);
             }
             else
             {
                 _playerSpawnPos = Vec3.Zero;
-                _playerForward = new Vec3(0f, 1f, 0f);
+                _playerForward = new Vec3(0f, 1f);
             }
         }
 
@@ -111,13 +109,13 @@ namespace TroopTrainingExpanded
                 }
             }
 
-            int needed = Math.Max(1, _troops.Count);
+            var needed = Math.Max(1, _troops.Count > 0 ? _troops.Count : _companions.Count);
             const float radius = 2f;
 
-            for (int i = 0; i < needed; i++)
+            for (var i = 0; i < needed; i++)
             {
-                float angle = (float)(i * (2 * Math.PI / needed));
-                var offset = new Vec3(MathF.Cos(angle) * radius, MathF.Sin(angle) * radius, 0f);
+                var angle = (float)(i * (2 * Math.PI / needed));
+                var offset = new Vec3(MathF.Cos(angle) * radius, MathF.Sin(angle) * radius);
                 _enemySpawnPositions.Add(_playerSpawnPos + offset);
             }
         }
@@ -170,17 +168,25 @@ namespace TroopTrainingExpanded
 
         private void SpawnCompanions()
         {
-            foreach (var comp in _companions)
+            bool companionsAreEnemies = _troops.Count == 0;
+            Team companionTeam = companionsAreEnemies ? Mission.AttackerTeam : Mission.PlayerTeam;
+
+            for (var i = 0; i < _companions.Count; i++)
             {
-                Vec3 offset = _playerSpawnPos + new Vec3(MBRandom.RandomFloatRanged(-1f, 1f), MBRandom.RandomFloatRanged(-1f, 1f), 0);
-                Vec3 lookDir = _playerForward;
-                bool companionsAreEnemies = _troops.Count == 0;
-                Team companionTeam = companionsAreEnemies ? Mission.AttackerTeam : Mission.PlayerTeam;
+                var comp = _companions[i];
+                Vec3 spawnPosition = companionsAreEnemies
+                    ? _enemySpawnPositions[i % _enemySpawnPositions.Count]
+                    : _playerSpawnPos + new Vec3(
+                        MBRandom.RandomFloatRanged(-1f, 1f),
+                        MBRandom.RandomFloatRanged(-1f, 1f));
+                Vec3 lookDir = companionsAreEnemies
+                    ? ComputeLookDirection(spawnPosition, _playerSpawnPos)
+                    : _playerForward;
 
                 Agent agent = Mission.SpawnAgent(
                     new AgentBuildData(comp)
                         .Team(companionTeam)
-                        .InitialPosition(offset)
+                        .InitialPosition(spawnPosition)
                         .InitialDirection(new Vec2(lookDir.x, lookDir.y))
                         .TroopOrigin(new PartyAgentOrigin(comp.HeroObject.PartyBelongedTo.Party, comp))
                         .NoHorses(!EquipHeroHorse())
@@ -208,7 +214,7 @@ namespace TroopTrainingExpanded
         {
             Vec3 d = to - from;
             float len = d.Length;
-            return len > 1e-5f ? d / len : new Vec3(0f, 1f, 0f);
+            return len > 1e-5f ? d / len : new Vec3(0f, 1f);
         }
 
         private void SpawnEnemy(CharacterObject troop, Vec3 pos, Vec3 lookDir, Team enemyTeam)
@@ -234,7 +240,7 @@ namespace TroopTrainingExpanded
         {
             bool heroHasHorse = HasHorse(Hero.MainHero.CharacterObject);
 
-            if (!enableHorses)
+            if (!EnableHorses)
                 return false;
 
             if (!heroHasHorse)
@@ -251,7 +257,7 @@ namespace TroopTrainingExpanded
 
         private static bool HasHorse(CharacterObject character)
         {
-            if (!enableHorses)
+            if (!EnableHorses)
                 return false;
             var horse = character?.Equipment?.GetEquipmentFromSlot(EquipmentIndex.Horse).Item;
             return horse != null;
