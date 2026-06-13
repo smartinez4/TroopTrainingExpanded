@@ -1,5 +1,7 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using SandBox.Missions.MissionLogics.Arena;
+using TaleWorlds.CampaignSystem.ComponentInterfaces;
+using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.MountAndBlade;
 using TroopTrainingExpanded.Behaviors;
 
@@ -33,6 +35,17 @@ namespace TroopTrainingExpanded.Patches
             if (mission?.MainAgent == null) return;
 
             mission.MainAgent.TeleportToPosition(mission.Scene.FindEntityWithTag("sp_arena").GetGlobalFrame().origin);
+        }
+    }
+
+    [HarmonyPatch(typeof(DefaultCombatXpModel), nameof(DefaultCombatXpModel.GetXpFromHit))]
+    public static class TrainingFightCombatXpPatch
+    {
+        [HarmonyPrefix]
+        static void UseFieldBattleXp(ref CombatXpModel.MissionTypeEnum missionType)
+        {
+            if (TrainingCampaignBehavior.DuelInProgress)
+                missionType = CombatXpModel.MissionTypeEnum.Battle;
         }
     }
 }

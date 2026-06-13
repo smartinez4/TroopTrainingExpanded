@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Helpers;
@@ -68,6 +68,7 @@ namespace TroopTrainingExpanded.Behaviors
             _troops.Clear();
 
             int maxTroopSelection = ModConfig.Instance.MaxTrainingTroops;
+            var partyRoles = SnapshotPartyRoles();
 
             var leftRoster = TroopRoster.CreateDummyTroopRoster();
             var leftPrisoners = TroopRoster.CreateDummyTroopRoster();
@@ -135,8 +136,33 @@ namespace TroopTrainingExpanded.Behaviors
                     }
                 }
 
+                RestoreCompanionPartyRoles(partyRoles);
                 _awaitingMissionStart = true;
                 return true;
+            }
+        }
+
+        private static Dictionary<Hero, List<PartyRole>> SnapshotPartyRoles()
+        {
+            var party = MobileParty.MainParty;
+            return party.MemberRoster.GetTroopRoster()
+                .Where(element => element.Character.IsHero)
+                .Select(element => element.Character.HeroObject)
+                .Where(hero => hero != null)
+                .ToDictionary(hero => hero, hero => party.GetHeroPartyRoles(hero).ToList());
+        }
+
+        private void RestoreCompanionPartyRoles(IReadOnlyDictionary<Hero, List<PartyRole>> partyRoles)
+        {
+            var party = MobileParty.MainParty;
+
+            foreach (var companion in _companionTroops.Select(character => character.HeroObject).Distinct())
+            {
+                if (companion == null || !partyRoles.TryGetValue(companion, out var roles))
+                    continue;
+
+                foreach (var role in roles)
+                    party.SetHeroPartyRole(companion, role);
             }
         }
 

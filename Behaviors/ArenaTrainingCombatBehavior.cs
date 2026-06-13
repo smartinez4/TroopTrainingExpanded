@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
@@ -109,7 +109,7 @@ namespace TroopTrainingExpanded.Behaviors
                 }
             }
 
-            var needed = Math.Max(1, _troops.Count);
+            var needed = Math.Max(1, _troops.Count > 0 ? _troops.Count : _companions.Count);
             const float radius = 2f;
 
             for (var i = 0; i < needed; i++)
@@ -168,17 +168,25 @@ namespace TroopTrainingExpanded.Behaviors
 
         private void SpawnCompanions()
         {
-            foreach (var comp in _companions)
+            bool companionsAreEnemies = _troops.Count == 0;
+            Team companionTeam = companionsAreEnemies ? Mission.AttackerTeam : Mission.PlayerTeam;
+
+            for (var i = 0; i < _companions.Count; i++)
             {
-                Vec3 offset = _playerSpawnPos + new Vec3(MBRandom.RandomFloatRanged(-1f, 1f), MBRandom.RandomFloatRanged(-1f, 1f));
-                Vec3 lookDir = _playerForward;
-                bool companionsAreEnemies = _troops.Count == 0;
-                Team companionTeam = companionsAreEnemies ? Mission.AttackerTeam : Mission.PlayerTeam;
+                var comp = _companions[i];
+                Vec3 spawnPosition = companionsAreEnemies
+                    ? _enemySpawnPositions[i % _enemySpawnPositions.Count]
+                    : _playerSpawnPos + new Vec3(
+                        MBRandom.RandomFloatRanged(-1f, 1f),
+                        MBRandom.RandomFloatRanged(-1f, 1f));
+                Vec3 lookDir = companionsAreEnemies
+                    ? ComputeLookDirection(spawnPosition, _playerSpawnPos)
+                    : _playerForward;
 
                 Agent agent = Mission.SpawnAgent(
                     new AgentBuildData(comp)
                         .Team(companionTeam)
-                        .InitialPosition(offset)
+                        .InitialPosition(spawnPosition)
                         .InitialDirection(new Vec2(lookDir.x, lookDir.y))
                         .TroopOrigin(new PartyAgentOrigin(comp.HeroObject.PartyBelongedTo.Party, comp))
                         .NoHorses(!EquipHeroHorse())
