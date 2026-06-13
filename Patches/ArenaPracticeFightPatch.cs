@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using SandBox.Missions.MissionLogics.Arena;
 using TaleWorlds.MountAndBlade;
+using TroopTrainingExpanded.Behaviors;
 
 namespace TroopTrainingExpanded.Patches
 {

@@ -1,7 +1,7 @@
-﻿using Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Helpers;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameMenus;
 using TaleWorlds.CampaignSystem.Party;
@@ -13,11 +13,11 @@ using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
 using TroopTrainingExpanded.Helpers;
 
-namespace TroopTrainingExpanded
+namespace TroopTrainingExpanded.Behaviors
 {
     public class TrainingCampaignBehavior : CampaignBehaviorBase
     {
-        public static bool DuelInProgress = false;
+        public static bool DuelInProgress;
 
         private readonly List<CharacterObject> _selectedTroops = [];
         private readonly List<CharacterObject> _companionTroops = [];
@@ -55,7 +55,7 @@ namespace TroopTrainingExpanded
                     }
                     return true;
                 },
-                args => OpenTroopSelectionScreen(),
+                _ => OpenTroopSelectionScreen(),
                 false,
                 3
             );
@@ -79,7 +79,24 @@ namespace TroopTrainingExpanded
                 TroopRoster rp, int lL, int rL) =>
                 new(true, TextObject.GetEmpty());
 
-            PartyPresentationDoneButtonDelegate onDone = (lm, lp, rm, rp, taken, rel, forced, leftParty, rightParty) =>
+            PartyScreenHelper.OpenScreenWithCondition(
+                Transferable,
+                AlwaysOk,
+                OnDone,
+                null,
+                PartyScreenLogic.TransferState.Transferable,
+                PartyScreenLogic.TransferState.NotTransferable,
+                new TextObject("{=ttx_select_troops}Select troops to fight"),
+                maxTroopSelection,
+                false,
+                false,
+                PartyScreenHelper.PartyScreenMode.Normal,
+                leftRoster,
+                leftPrisoners
+            );
+            return;
+
+            bool OnDone(TroopRoster lm, TroopRoster troopRoster, TroopRoster troopRoster1, TroopRoster troopRoster2, FlattenedTroopRoster flattenedTroopRoster, FlattenedTroopRoster flattenedTroopRoster1, bool b, PartyBase partyBase, PartyBase partyBase1)
             {
                 var roster = lm.GetTroopRoster().Where(e => e.Number > 0).ToList();
                 int count = roster.Sum(e => e.Number);
@@ -95,15 +112,14 @@ namespace TroopTrainingExpanded
                 {
                     var msg = new TextObject("{=ttx_select_max}You cannot select more than {maxTroopSelection} troops.");
                     msg.SetTextVariable("maxTroopSelection", maxTroopSelection);
-                    InformationManager.DisplayMessage(
-                        new InformationMessage(msg.ToString()));
+                    InformationManager.DisplayMessage(new InformationMessage(msg.ToString()));
                     return false;
                 }
 
                 _selectedTroops.Clear();
                 foreach (var unit in roster)
                 {
-                    for (int i = 0; i < unit.Number; i++)
+                    for (var i = 0; i < unit.Number; i++)
                     {
                         _selectedTroops.Add(unit.Character);
                         if (unit.Character.IsHero && unit.Character.HeroObject != Hero.MainHero)
@@ -112,41 +128,24 @@ namespace TroopTrainingExpanded
                         }
                         else
                         {
-                             _troops.Add(unit.Character);
+                            _troops.Add(unit.Character);
                         }
+
                         MobileParty.MainParty.MemberRoster.AddToCounts(unit.Character, 1);
                     }
                 }
 
                 _awaitingMissionStart = true;
                 return true;
-            };
-
-            PartyScreenHelper.OpenScreenWithCondition(
-                Transferable,
-                AlwaysOk,
-                onDone,
-                null,
-                PartyScreenLogic.TransferState.Transferable,
-                PartyScreenLogic.TransferState.NotTransferable,
-                new TextObject("{=ttx_select_troops}Select troops to fight"),
-                maxTroopSelection,
-                false,
-                false,
-                PartyScreenHelper.PartyScreenMode.Normal,
-                leftRoster,
-                leftPrisoners
-            );
+            }
         }
 
         private void OnGameMenuOpened(MenuCallbackArgs args)
         {
-            if (_awaitingMissionStart &&
-                args.MenuContext.GameMenu.StringId == "town_arena")
-            {
-                _awaitingMissionStart = false;
-                StartDuel();
-            }
+            if (!_awaitingMissionStart ||
+                args.MenuContext.GameMenu.StringId != "town_arena") return;
+            _awaitingMissionStart = false;
+            StartDuel();
         }
 
         private void StartDuel()
@@ -172,11 +171,9 @@ namespace TroopTrainingExpanded
 
             _awaitingMissionStart = false;
 
-            if (iMission is Mission mission)
-            {
-                _activeDuel = new ArenaTrainingCombatBehavior(_troops, _companionTroops);
-                mission.AddMissionBehavior(_activeDuel);
-            }
+            if (iMission is not Mission mission) return;
+            _activeDuel = new ArenaTrainingCombatBehavior(_troops, _companionTroops);
+            mission.AddMissionBehavior(_activeDuel);
         }
 
         private void OnMissionEnded(IMission mission)
@@ -202,15 +199,13 @@ namespace TroopTrainingExpanded
 
             foreach (var troop in defeated)
             {
-                bool isAdded = PromotionHelpers.GrantXpForPromotion(model, troop);
-                if (isAdded)
-                {
-                    var msg = new TextObject("{=ttx_ready_promotion}{unit} is ready for promotion!");
-                    msg.SetTextVariable("unit", troop.Name);
-                    InformationManager.DisplayMessage(
-                        new InformationMessage(msg.ToString())
-                    );
-                }
+                var isAdded = PromotionHelpers.GrantXpForPromotion(model, troop);
+                if (!isAdded) continue;
+                var msg = new TextObject("{=ttx_ready_promotion}{unit} is ready for promotion!");
+                msg.SetTextVariable("unit", troop.Name);
+                InformationManager.DisplayMessage(
+                    new InformationMessage(msg.ToString())
+                );
             }
         }
     }
