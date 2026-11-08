@@ -13,7 +13,7 @@ namespace TroopTrainingExpanded
             base.OnSubModuleLoad();
 
             var harmony = new Harmony("trooptrainingexpanded.duel");
-            harmony.PatchAll();
+            harmony.PatchAll(typeof(Main).Assembly);
         }
 
         protected override void OnGameStart(Game game, IGameStarter gameStarterObject)

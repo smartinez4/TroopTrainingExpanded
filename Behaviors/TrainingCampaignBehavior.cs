@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Helpers;
@@ -25,6 +25,7 @@ namespace TroopTrainingExpanded.Behaviors
 
         private bool _awaitingMissionStart;
         private ArenaTrainingCombatBehavior _activeDuel;
+        private IMission _activeDuelMission;
 
         public override void RegisterEvents()
         {
@@ -192,47 +193,49 @@ namespace TroopTrainingExpanded.Behaviors
 
         private void OnMissionStarted(IMission iMission)
         {
-            if (!_awaitingMissionStart)
+            if (!_awaitingMissionStart || !DuelInProgress)
                 return;
 
             _awaitingMissionStart = false;
 
             if (iMission is not Mission mission) return;
             _activeDuel = new ArenaTrainingCombatBehavior(_troops, _companionTroops);
+            _activeDuelMission = iMission;
             mission.AddMissionBehavior(_activeDuel);
         }
 
         private void OnMissionEnded(IMission mission)
         {
+            if (_activeDuel == null || !ReferenceEquals(mission, _activeDuelMission))
+                return;
+
+            var defeated = _activeDuel.DefeatedTroops.ToArray();
+            _activeDuel = null;
+            _activeDuelMission = null;
             DuelInProgress = false;
+            _awaitingMissionStart = false;
 
             _selectedTroops.Clear();
             _companionTroops.Clear();
             _troops.Clear();
 
-            if (mission is not Mission m) return;
-
-            var duel = m.GetMissionBehavior<ArenaTrainingCombatBehavior>();
-            if (duel != null)
-                ApplyPromotionXp(duel.DefeatedTroops);
+            foreach (var troop in defeated)
+                ApplyPromotionXp(troop);
         }
 
-        private void ApplyPromotionXp(IEnumerable<CharacterObject> defeated)
+        private void ApplyPromotionXp(CharacterObject troop)
         {
-            if (defeated == null) return;
+            if (troop == null) return;
 
             var model = Campaign.Current.Models.PartyTroopUpgradeModel;
 
-            foreach (var troop in defeated)
-            {
-                var isAdded = PromotionHelpers.GrantXpForPromotion(model, troop);
-                if (!isAdded) continue;
-                var msg = new TextObject("{=ttx_ready_promotion}{unit} is ready for promotion!");
-                msg.SetTextVariable("unit", troop.Name);
-                InformationManager.DisplayMessage(
-                    new InformationMessage(msg.ToString())
-                );
-            }
+            var isAdded = PromotionHelpers.GrantXpForPromotion(model, troop);
+            if (!isAdded) return;
+            var msg = new TextObject("{=ttx_ready_promotion}{unit} is ready for promotion!");
+            msg.SetTextVariable("unit", troop.Name);
+            InformationManager.DisplayMessage(
+                new InformationMessage(msg.ToString())
+            );
         }
     }
 }

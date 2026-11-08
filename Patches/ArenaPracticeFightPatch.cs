@@ -1,4 +1,5 @@
 using HarmonyLib;
+using SandBox.Missions.MissionLogics;
 using SandBox.Missions.MissionLogics.Arena;
 using TaleWorlds.CampaignSystem.ComponentInterfaces;
 using TaleWorlds.CampaignSystem.GameComponents;
@@ -10,31 +11,41 @@ namespace TroopTrainingExpanded.Patches
     [HarmonyPatch(typeof(ArenaPracticeFightMissionController))]
     public static class ArenaPracticeFightPatch
     {
+        internal static bool IsTrainingMission(Mission mission)
+        {
+            return mission?.GetMissionBehavior<ArenaTrainingCombatBehavior>() != null;
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch("StartPractice")]
-        static bool StopPracticeFight()
+        static bool StopPracticeFight(ArenaPracticeFightMissionController __instance)
         {
-            return !TrainingCampaignBehavior.DuelInProgress;
+            return !IsTrainingMission(__instance.Mission);
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("OnMissionTick")]
-        static bool StopSpawning()
+        static bool StopSpawning(ArenaPracticeFightMissionController __instance)
         {
-            return !TrainingCampaignBehavior.DuelInProgress;
+            return !IsTrainingMission(__instance.Mission);
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch("AfterStart")]
-        static void FixPlayerSpawn(ArenaPracticeFightMissionController __instance)
+        [HarmonyPrefix]
+        [HarmonyPatch("OnAgentRemoved")]
+        static bool StopPracticeScoring(ArenaPracticeFightMissionController __instance)
         {
-            if (!TrainingCampaignBehavior.DuelInProgress)
-                return;
+            return !IsTrainingMission(__instance.Mission);
+        }
+    }
 
-            var mission = Mission.Current;
-            if (mission?.MainAgent == null) return;
-
-            mission.MainAgent.TeleportToPosition(mission.Scene.FindEntityWithTag("sp_arena").GetGlobalFrame().origin);
+    // Arena startup spawns location NPCs separately from StartPractice.
+    [HarmonyPatch(typeof(MissionAgentHandler), "SpawnLocationCharacters")]
+    public static class TrainingArenaLocationCharactersPatch
+    {
+        [HarmonyPrefix]
+        static bool StopLocationSpawning(MissionAgentHandler __instance)
+        {
+            return !ArenaPracticeFightPatch.IsTrainingMission(__instance.Mission);
         }
     }
 
