@@ -1,5 +1,8 @@
 ﻿## Changelog
 
+## 1.1.7
+- Fixed issues with Bannerlord version 1.5.X
+
 ## 1.1.6
 - Fixed companions losing role after training fight
 - Fixed companion positioning when spawning as an enemy

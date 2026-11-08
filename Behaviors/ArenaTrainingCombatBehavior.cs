@@ -20,6 +20,7 @@ namespace TroopTrainingExpanded.Behaviors
         private static readonly bool EnableHorses = ModConfig.Instance.EnableHorses;
 
         private readonly List<CharacterObject> _defeatedTroops = new();
+        private readonly Dictionary<Agent, CharacterObject> _trainingOpponents = new();
         private readonly List<CharacterObject> _troops = troops ?? new List<CharacterObject>();
         private readonly List<CharacterObject> _companions = companions ?? new List<CharacterObject>();
 
@@ -36,6 +37,7 @@ namespace TroopTrainingExpanded.Behaviors
         public override void AfterStart()
         {
             _defeatedTroops.Clear();
+            _trainingOpponents.Clear();
             ResolveSpawnPositions();
             SpawnAll();
         }
@@ -160,7 +162,8 @@ namespace TroopTrainingExpanded.Behaviors
                 .InitialPosition(_playerSpawnPos)
                 .InitialDirection(new Vec2(_playerForward.x, _playerForward.y));
 
-            Agent agent = Mission.SpawnAgent(data);
+            Agent agent = Mission.SpawnAgent(data, spawnFromAgentVisuals: false,
+                agentSpawnEquipment: null, formationBannerItem: null);
             Mission.MainAgent = agent;
 
             agent.LookDirection = _playerForward;
@@ -190,8 +193,14 @@ namespace TroopTrainingExpanded.Behaviors
                         .InitialDirection(new Vec2(lookDir.x, lookDir.y))
                         .TroopOrigin(new PartyAgentOrigin(comp.HeroObject.PartyBelongedTo.Party, comp))
                         .NoHorses(!EquipHeroHorse())
-                        .CivilianEquipment(false)
+                        .CivilianEquipment(false),
+                    spawnFromAgentVisuals: false,
+                    agentSpawnEquipment: null,
+                    formationBannerItem: null
                 );
+
+                if (companionsAreEnemies)
+                    _trainingOpponents.Add(agent, comp);
 
                 agent.Controller = AgentControllerType.AI;
                 agent.SetWatchState(Agent.WatchState.Alarmed);
@@ -228,9 +237,13 @@ namespace TroopTrainingExpanded.Behaviors
                     .InitialDirection(look2)
                     .NoHorses(!HasHorse(troop))
                     .TroopOrigin(new SimpleAgentOrigin(troop))
-                    .CivilianEquipment(false)
+                    .CivilianEquipment(false),
+                spawnFromAgentVisuals: false,
+                agentSpawnEquipment: null,
+                formationBannerItem: null
             );
 
+            _trainingOpponents.Add(agent, troop);
             agent.Controller = AgentControllerType.AI;
             agent.SetWatchState(Agent.WatchState.Alarmed);
             agent.SetMorale(100f);
@@ -265,13 +278,15 @@ namespace TroopTrainingExpanded.Behaviors
 
         public override void OnAgentRemoved(Agent affected, Agent affector, AgentState state, KillingBlow blow)
         {
-            if (affected?.Character is not CharacterObject c)
+            if (affected == null || !_trainingOpponents.TryGetValue(affected, out var troop))
                 return;
 
-            if (affector != null && affector.Team == Mission.PlayerTeam)
-            {
-                _defeatedTroops.Add(c);
-            }
+            if (state != AgentState.Killed && state != AgentState.Unconscious)
+                return;
+
+            // Only selected opponents count, once per soldier.
+            _trainingOpponents.Remove(affected);
+            _defeatedTroops.Add(troop);
         }
 
         public override void OnMissionTick(float dt)
@@ -306,11 +321,7 @@ namespace TroopTrainingExpanded.Behaviors
             if (_victoryShown)
                 return;
 
-            bool anyEnemiesAlive = Mission.Agents.Any(a =>
-                a != null &&
-                a.Team == Mission.AttackerTeam &&
-                a != Mission.MainAgent &&
-                a.IsActive());
+            bool anyEnemiesAlive = _trainingOpponents.Keys.Any(a => a.IsActive());
 
             if (!anyEnemiesAlive)
             {

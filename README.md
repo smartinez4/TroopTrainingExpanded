@@ -2,6 +2,8 @@
 
 A Mount & Blade II: Bannerlord mod that adds configurable training fights to town arenas. Players can fight selected troops which will gain promotions if the player defeats them. Bring companions as allies, or duel them while earning combat XP.
 
+At the end of the training mission, selected soldiers who were defeated receive promotion XP and a confirmation message. Upgrade them from the party screen. Companions and troops with no further upgrade do not receive promotion XP.
+
 ## Project Structure
 
 - `Main.cs` - Module entry point and Harmony initialization.
@@ -17,6 +19,8 @@ A Mount & Blade II: Bannerlord mod that adds configurable training fights to tow
 Open `TroopTrainingExpanded.slnx` in Rider or your preferred IDE and build the `x64` project. Debug builds are copied directly to the mod's `Win64_Shipping_Client` directory; Release builds go to `bin/Release`.
 
 The project targets .NET Framework 4.7.2 and references Bannerlord assemblies from the local game installation.
+
+After a Release build, run `powershell -NoProfile -File .\Tests\VerifyTraining.ps1` to check the managed training guards, defeated-soldier tracking, and rewards at mission end. Combat and roster XP still require an in-game test. When using Mod Organizer, install the rebuilt DLL in its active mod folder; it overrides the copy in the game's `Modules` directory.
 
 ## For new Bannerlord versions
 

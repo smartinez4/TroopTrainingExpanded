@@ -9,7 +9,7 @@ public static class PromotionHelpers
 {
     public static bool GrantXpForPromotion(PartyTroopUpgradeModel model, CharacterObject troop)
     {
-        if (model == null || troop == null) return false;
+        if (model == null || troop == null || troop.IsHero) return false;
 
         var party = PartyBase.MainParty;
         if (party == null) return false;
@@ -22,7 +22,7 @@ public static class PromotionHelpers
                 continue;
 
             var upgradeTarget = troop.UpgradeTargets?.FirstOrDefault();
-            if (upgradeTarget == null) 
+            if (upgradeTarget == null)
                 return false;
 
             var xp = model.GetXpCostForUpgrade(party, troop, upgradeTarget);
